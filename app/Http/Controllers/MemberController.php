@@ -19,7 +19,7 @@ class MemberController extends Controller
             ->paginate($perPage);
 
         return response()->json([
-            'success' => true,
+            'status' => 'success',
             'message' => 'Members retrieved successfully',
             'data' => MemberResource::collection($members->getCollection())->resolve(),
             'meta' => [
@@ -27,6 +27,8 @@ class MemberController extends Controller
                 'per_page' => $members->perPage(),
                 'total' => $members->total(),
                 'last_page' => $members->lastPage(),
+                'service_name' => 'Member-Service',
+                'api_version' => 'v1',
             ],
         ]);
     }
@@ -39,9 +41,13 @@ class MemberController extends Controller
         ]);
 
         return response()->json([
-            'success' => true,
+            'status' => 'success',
             'message' => 'Member created successfully',
             'data' => MemberResource::make($member)->resolve(),
+            'meta' => [
+                'service_name' => 'Member-Service',
+                'api_version' => 'v1',
+            ],
         ], 201);
     }
 
@@ -51,16 +57,20 @@ class MemberController extends Controller
 
         if (! $member) {
             return response()->json([
-                'success' => false,
+                'status' => 'error',
                 'message' => 'Member not found',
-                'data' => null,
+                'errors' => null,
             ], 404);
         }
 
         return response()->json([
-            'success' => true,
+            'status' => 'success',
             'message' => 'Member retrieved successfully',
             'data' => MemberResource::make($member)->resolve(),
+            'meta' => [
+                'service_name' => 'Member-Service',
+                'api_version' => 'v1',
+            ],
         ]);
     }
 }

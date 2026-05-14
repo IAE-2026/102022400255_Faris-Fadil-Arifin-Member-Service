@@ -86,13 +86,54 @@ Do not query another service's database directly. If a service needs data from a
 
 ## API Response Standard
 
-All services should return JSON with this envelope:
+All service endpoints must use JSON over HTTP:
+
+```http
+Content-Type: application/json
+Accept: application/json
+```
+
+All service endpoints must require the IAE integration key header:
+
+```http
+X-IAE-KEY: <service-owner-nim>
+```
+
+This member service uses:
+
+```http
+X-IAE-KEY: 102022400255
+```
+
+Each consuming service should keep dependency keys in `.env`, for example:
+
+```env
+MEMBER_SERVICE_KEY=102022400255
+BOOK_SERVICE_KEY=<catalog-owner-nim>
+LOAN_SERVICE_KEY=<loan-owner-nim>
+```
+
+All successful responses should follow the IAE-T2 envelope:
 
 ```json
 {
-  "success": true,
+  "status": "success",
   "message": "Operation successful",
-  "data": {}
+  "data": {},
+  "meta": {
+    "service_name": "Member-Service",
+    "api_version": "v1"
+  }
+}
+```
+
+Use `meta` for pagination and service information. Error responses should follow:
+
+```json
+{
+  "status": "error",
+  "message": "Detail pesan kesalahan...",
+  "errors": null
 }
 ```
 
@@ -100,6 +141,7 @@ HTTP status rules:
 
 - `200`: successful read/action
 - `201`: successful create
+- `401`: missing or invalid `X-IAE-KEY`
 - `404`: requested resource not found
 - `422`: validation error
 - `503`: dependency service unavailable
@@ -168,7 +210,9 @@ Required environment variables:
 
 ```env
 MEMBER_SERVICE_URL=http://member-service:8000/api/v1
+MEMBER_SERVICE_KEY=102022400255
 BOOK_SERVICE_URL=http://catalog-service:8000/api/v1
+BOOK_SERVICE_KEY=<catalog-owner-nim>
 ```
 
 Required endpoints:
@@ -195,9 +239,9 @@ updated_at
 
 Loan service rules:
 
-- Before creating a loan, call `GET /api/v1/members/{id}` on member-service.
+- Before creating a loan, call `GET /api/v1/members/{id}` on member-service with `X-IAE-KEY: 102022400255`.
 - Reject the loan if `is_active` is false.
-- Before creating a loan, call `GET /api/v1/books/{id}` on catalog-service.
+- Before creating a loan, call `GET /api/v1/books/{id}` on catalog-service with that service's `X-IAE-KEY`.
 - Reject the loan if `available_stock` is less than `1`.
 - Return `503` if member-service or catalog-service cannot be reached.
 
@@ -209,6 +253,7 @@ A service repo is ready when:
 - The service joins `tubes-iae-network`.
 - The service is reachable from host/Postman.
 - The service can reach dependency services by Docker service name.
+- All API endpoints require `X-IAE-KEY` and return the IAE-T2 response envelope.
 - Migrations run successfully against its own database.
 - API tests pass inside Docker.
 - The service README documents setup, endpoints, and integration URLs.

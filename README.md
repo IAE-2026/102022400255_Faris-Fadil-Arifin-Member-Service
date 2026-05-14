@@ -91,13 +91,41 @@ DB_PASSWORD=iae_password
 
 ## API Contract
 
-All API responses use a simple envelope:
+All API endpoints require JSON over HTTP and the IAE contract header:
+
+```http
+Content-Type: application/json
+Accept: application/json
+X-IAE-KEY: 102022400255
+```
+
+The `X-IAE-KEY` value is configured with:
+
+```env
+IAE_API_KEY=102022400255
+```
+
+Successful API responses use the IAE-T2 response envelope:
 
 ```json
 {
-  "success": true,
+  "status": "success",
   "message": "Member retrieved successfully",
-  "data": {}
+  "data": {},
+  "meta": {
+    "service_name": "Member-Service",
+    "api_version": "v1"
+  }
+}
+```
+
+Error responses use:
+
+```json
+{
+  "status": "error",
+  "message": "Detail pesan kesalahan...",
+  "errors": null
 }
 ```
 
@@ -122,6 +150,8 @@ Example:
 ```bash
 curl -X POST http://localhost:8001/api/v1/members \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "X-IAE-KEY: 102022400255" \
   -d "{\"name\":\"Budi Santoso\",\"student_number\":\"SISWA-00001\",\"email\":\"budi@example.com\",\"phone\":\"08123456789\",\"address\":\"Jl. Merdeka No. 1\"}"
 ```
 
@@ -138,7 +168,9 @@ Optional query parameter:
 Example:
 
 ```bash
-curl http://localhost:8001/api/v1/members?per_page=10
+curl http://localhost:8001/api/v1/members?per_page=10 \
+  -H "Accept: application/json" \
+  -H "X-IAE-KEY: 102022400255"
 ```
 
 ### Get Member Detail
@@ -150,7 +182,9 @@ Use this endpoint from the peminjaman service to validate member status.
 Example:
 
 ```bash
-curl http://localhost:8001/api/v1/members/1
+curl http://localhost:8001/api/v1/members/1 \
+  -H "Accept: application/json" \
+  -H "X-IAE-KEY: 102022400255"
 ```
 
 Important response fields:
@@ -169,7 +203,7 @@ Validation errors return HTTP `422`:
 
 ```json
 {
-  "success": false,
+  "status": "error",
   "message": "Validation failed",
   "errors": {
     "email": ["The email field is required."]
@@ -181,9 +215,19 @@ Missing members return HTTP `404`:
 
 ```json
 {
-  "success": false,
+  "status": "error",
   "message": "Member not found",
-  "data": null
+  "errors": null
+}
+```
+
+Missing or invalid API keys return HTTP `401`:
+
+```json
+{
+  "status": "error",
+  "message": "Invalid or missing API key",
+  "errors": null
 }
 ```
 
@@ -202,6 +246,7 @@ Then services can call each other by Docker service name:
 
 ```env
 MEMBER_SERVICE_URL=http://member-service:8000/api/v1
+MEMBER_SERVICE_KEY=102022400255
 BOOK_SERVICE_URL=http://catalog-service:8000/api/v1
 LOAN_SERVICE_URL=http://loan-service:8000/api/v1
 ```

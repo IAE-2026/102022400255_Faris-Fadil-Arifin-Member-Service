@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return response()->json([
-        'success' => true,
+        'status' => 'success',
         'message' => 'Keanggotaan service is running',
         'data' => [
             'service' => 'keanggotaan',

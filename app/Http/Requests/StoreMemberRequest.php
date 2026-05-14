@@ -31,7 +31,7 @@ class StoreMemberRequest extends FormRequest
     {
         throw new HttpResponseException(
             response()->json([
-                'success' => false,
+                'status' => 'error',
                 'message' => 'Validation failed',
                 'errors' => $validator->errors(),
             ], 422)
