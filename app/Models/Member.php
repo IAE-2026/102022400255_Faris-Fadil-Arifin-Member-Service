@@ -45,4 +45,9 @@ class Member extends Model
     {
         return $this->status === self::STATUS_ACTIVE;
     }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return $this->isActive();
+    }
 }

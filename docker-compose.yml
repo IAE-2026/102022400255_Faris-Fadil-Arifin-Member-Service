@@ -37,6 +37,9 @@ services:
       APP_DEBUG: "true"
       APP_URL: "http://localhost:8001"
       IAE_API_KEY: "102022400255"
+      L5_SWAGGER_GENERATE_ALWAYS: "true"
+      GRAPHIQL_ENABLED: "true"
+      LIGHTHOUSE_SCHEMA_CACHE_ENABLE: "false"
       DB_CONNECTION: mysql
       DB_HOST: mysql-member
       DB_PORT: 3306

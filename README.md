@@ -10,6 +10,8 @@ This is now a personal service repository. Teammates should keep their own servi
 - Laravel 13
 - MySQL 8.4
 - Docker Compose
+- L5-Swagger / OpenAPI
+- Lighthouse GraphQL with GraphiQL playground
 
 ## Service URLs
 
@@ -57,6 +59,14 @@ Check the service:
 
 ```bash
 curl http://localhost:8001/
+```
+
+Open interactive documentation:
+
+```text
+Swagger UI:        http://localhost:8001/api/documentation
+GraphQL Playground: http://localhost:8001/graphql-playground
+GraphiQL alias:      http://localhost:8001/graphiql
 ```
 
 Stop containers:
@@ -197,6 +207,79 @@ Important response fields:
 }
 ```
 
+## Swagger / OpenAPI
+
+Swagger UI is available at:
+
+```text
+http://localhost:8001/api/documentation
+```
+
+The generated OpenAPI JSON is available at:
+
+```text
+http://localhost:8001/docs
+```
+
+If you change OpenAPI attributes, regenerate docs with:
+
+```bash
+php artisan l5-swagger:generate
+```
+
+The documented endpoints include:
+
+```text
+GET  /api/v1/members
+POST /api/v1/members
+GET  /api/v1/members/{id}
+POST /graphql
+```
+
+## GraphQL
+
+GraphQL endpoint:
+
+```text
+POST /graphql
+```
+
+GraphQL also requires:
+
+```http
+X-IAE-KEY: 102022400255
+```
+
+Interactive GraphQL playground:
+
+```text
+http://localhost:8001/graphql-playground
+```
+
+Example query:
+
+```graphql
+{
+  members {
+    id
+    name
+    student_number
+    status
+    is_active
+  }
+}
+```
+
+Example `curl`:
+
+```bash
+curl -X POST http://localhost:8001/graphql \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "X-IAE-KEY: 102022400255" \
+  -d "{\"query\":\"{ members { id name student_number status is_active } }\"}"
+```
+
 ## Error Responses
 
 Validation errors return HTTP `422`:
@@ -252,6 +335,7 @@ LOAN_SERVICE_URL=http://loan-service:8000/api/v1
 ```
 
 More details are in [docs/service-requirements.md](docs/service-requirements.md).
+The generic prompt for other teams is in [docs/generic-assignment-prompt.md](docs/generic-assignment-prompt.md).
 The AI chat transcript is in [docs/member-history-ai-chat.md](docs/member-history-ai-chat.md).
 
 ## Local Non-Docker Setup

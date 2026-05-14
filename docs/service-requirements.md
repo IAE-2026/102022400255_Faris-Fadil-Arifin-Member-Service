@@ -84,6 +84,24 @@ tubes_iae_peminjaman
 
 Do not query another service's database directly. If a service needs data from another service, call its API endpoint.
 
+## Assignment 2 Documentation Requirements
+
+Every service should expose interactive API documentation:
+
+```text
+Swagger UI: http://localhost:<service-port>/api/documentation
+OpenAPI JSON: http://localhost:<service-port>/docs
+```
+
+Every service should expose at least one GraphQL query for the same resource data as its REST API:
+
+```text
+GraphQL endpoint: POST http://localhost:<service-port>/graphql
+GraphQL playground: http://localhost:<service-port>/graphql-playground
+```
+
+GraphQL endpoints should also require `X-IAE-KEY`.
+
 ## API Response Standard
 
 All service endpoints must use JSON over HTTP:
@@ -154,6 +172,7 @@ This repository provides:
 GET  /api/v1/members
 POST /api/v1/members
 GET  /api/v1/members/{id}
+POST /graphql
 ```
 
 `GET /api/v1/members/{id}` includes:
@@ -164,6 +183,20 @@ is_active
 ```
 
 Loan service must use this endpoint to validate member status.
+
+This repository also provides GraphQL member queries:
+
+```graphql
+{
+  members {
+    id
+    name
+    student_number
+    status
+    is_active
+  }
+}
+```
 
 ## Catalog Service Requirements
 
@@ -254,6 +287,8 @@ A service repo is ready when:
 - The service is reachable from host/Postman.
 - The service can reach dependency services by Docker service name.
 - All API endpoints require `X-IAE-KEY` and return the IAE-T2 response envelope.
+- Swagger UI and OpenAPI JSON are available and document all REST endpoints.
+- GraphQL endpoint and playground are available with at least one useful query.
 - Migrations run successfully against its own database.
 - API tests pass inside Docker.
 - The service README documents setup, endpoints, and integration URLs.
