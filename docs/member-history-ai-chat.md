@@ -1587,3 +1587,188 @@ When planning, include:
 - Repository setup
 - Final checklist for implementation
 ````
+
+## Tugas 3
+
+Catatan keamanan: nilai credential seperti API key/password tidak ditulis mentah di dokumen repository. Wording chat dipertahankan, tetapi credential diganti dengan marker redaksi.
+
+### User
+
+```text
+i want you to build only the tugas 3 only, ignore tubes section. heres the files for the context. akun Warga: warga38@ktp.iae.id & API-KEY: [REDACTED_API_KEY]
+```
+
+### Assistant
+
+```text
+<proposed_plan>
+# Tugas 3 Individual Integration Service
+
+## Summary
+Build only the Tugas 3 deliverable, not the TUBES/group section. The app will be a dependency-free Node.js HTTP service for a Digital City permit payment flow. A citizen logs in through the IAE SSO, the app verifies the RS256 JWT using JWKS, maps `warga38@ktp.iae.id` to a local `WARGA` role, processes a critical `PermitPaymentConfirmed` state change, sends a SOAP audit to the legacy endpoint, stores the returned receipt number, then publishes a JSON event to the RabbitMQ board through the central publish API.
+
+Use the PDF contract plus the live IAE index/board behavior: [IAE Central Mock Server](https://iae-sso.virtualfri.id/) and [RabbitMQ board](https://iae-sso.virtualfri.id/board).
+
+## Key Changes
+- Create a Node app using built-in modules only: `node:http`, `fetch`, WebCrypto, and experimental `node:sqlite`; no Express/npm dependency.
+- Add local SQLite tables for `roles`, `permits`, `payments`, `audit_logs`, and `published_events`, seeded with `TEAM-38`, `warga38@ktp.iae.id`, and a pending permit invoice.
+- Add API endpoints:
+  - `GET /health`: local DB status plus central `/health`.
+  - `POST /api/auth/login`: calls central `/api/v1/auth/token` with citizen credentials, verifies JWT via JWKS, returns decoded payload and local role mapping.
+  - `GET /api/auth/me`: verifies Bearer JWT and returns local role/permissions.
+  - `GET /api/permits`: lists permit invoices for the authenticated citizen.
+  - `POST /api/permits/:id/pay`: validates `WARGA`, marks payment paid, sends SOAP audit, saves `ReceiptNumber`, publishes RabbitMQ JSON, and returns the full integration result.
+- Add central integration clients:
+  - SSO/JWKS verifier for `RS256` token validation.
+  - SOAP client that posts XML Envelope to `/soap/v1/audit` with `TeamID=TEAM-38`, `ActivityName=PermitPaymentConfirmed`, and CDATA JSON log content.
+  - Publisher that posts M2M-authenticated JSON to `/api/v1/messages/publish` using routing key `permit.payment.confirmed` and event body containing permit, payment, receipt, team, actor, and timestamp.
+- Add a small static dashboard served from `/` to demo login, role mapping, permit payment, SOAP receipt, and publish status.
+- Add required docs:
+  - `analisis_tugas_3.md` with critical transaction justification and Mermaid sequence diagram.
+  - `prompt_engineering_log.md` summarizing the assignment prompts, decisions, and technical exploration.
+  - `README.md`, `.env.example`, and `.gitignore`; real API key/password stay in local `.env`, not committed.
+
+## Test Plan
+- Unit tests with `node:test` for JWT verification, role mapping, SOAP envelope generation, receipt parsing, publish payload creation, and payment state transitions.
+- Mocked integration tests for successful payment, SOAP failure, publish failure, missing token, invalid role, and duplicate payment.
+- Live smoke test with provided credentials:
+  - Login as `warga38@ktp.iae.id`.
+  - Pay the seeded permit.
+  - Confirm response includes `IAE-LOG-2026-*` receipt.
+  - Confirm `permit.payment.confirmed` appears on `/board`.
+
+## Assumptions
+- Use `TEAM-38` as SOAP `TeamID`.
+- Use Permit Payment as the critical state-changing transaction.
+- Use built-in Node HTTP instead of Express because this environment has bundled Node but no npm/Express.
+- Use the API key only for M2M SOAP and publish calls; use the citizen login token for local user authentication and role mapping.
+- Do not implement TUBES/group requirements such as API Gateway, merged services, Docker group architecture, or group contribution summary.
+</proposed_plan>
+```
+
+### User
+
+```text
+PLEASE IMPLEMENT THIS PLAN:
+# Tugas 3 Individual Integration Service
+
+## Summary
+Build only the Tugas 3 deliverable, not the TUBES/group section. The app will be a dependency-free Node.js HTTP service for a Digital City permit payment flow. A citizen logs in through the IAE SSO, the app verifies the RS256 JWT using JWKS, maps `warga38@ktp.iae.id` to a local `WARGA` role, processes a critical `PermitPaymentConfirmed` state change, sends a SOAP audit to the legacy endpoint, stores the returned receipt number, then publishes a JSON event to the RabbitMQ board through the central publish API.
+
+Use the PDF contract plus the live IAE index/board behavior: [IAE Central Mock Server](https://iae-sso.virtualfri.id/) and [RabbitMQ board](https://iae-sso.virtualfri.id/board).
+
+## Key Changes
+- Create a Node app using built-in modules only: `node:http`, `fetch`, WebCrypto, and experimental `node:sqlite`; no Express/npm dependency.
+- Add local SQLite tables for `roles`, `permits`, `payments`, `audit_logs`, and `published_events`, seeded with `TEAM-38`, `warga38@ktp.iae.id`, and a pending permit invoice.
+- Add API endpoints:
+  - `GET /health`: local DB status plus central `/health`.
+  - `POST /api/auth/login`: calls central `/api/v1/auth/token` with citizen credentials, verifies JWT via JWKS, returns decoded payload and local role mapping.
+  - `GET /api/auth/me`: verifies Bearer JWT and returns local role/permissions.
+  - `GET /api/permits`: lists permit invoices for the authenticated citizen.
+  - `POST /api/permits/:id/pay`: validates `WARGA`, marks payment paid, sends SOAP audit, saves `ReceiptNumber`, publishes RabbitMQ JSON, and returns the full integration result.
+- Add central integration clients:
+  - SSO/JWKS verifier for `RS256` token validation.
+  - SOAP client that posts XML Envelope to `/soap/v1/audit` with `TeamID=TEAM-38`, `ActivityName=PermitPaymentConfirmed`, and CDATA JSON log content.
+  - Publisher that posts M2M-authenticated JSON to `/api/v1/messages/publish` using routing key `permit.payment.confirmed` and event body containing permit, payment, receipt, team, actor, and timestamp.
+- Add a small static dashboard served from `/` to demo login, role mapping, permit payment, SOAP receipt, and publish status.
+- Add required docs:
+  - `analisis_tugas_3.md` with critical transaction justification and Mermaid sequence diagram.
+  - `prompt_engineering_log.md` summarizing the assignment prompts, decisions, and technical exploration.
+  - `README.md`, `.env.example`, and `.gitignore`; real API key/password stay in local `.env`, not committed.
+
+## Test Plan
+- Unit tests with `node:test` for JWT verification, role mapping, SOAP envelope generation, receipt parsing, publish payload creation, and payment state transitions.
+- Mocked integration tests for successful payment, SOAP failure, publish failure, missing token, invalid role, and duplicate payment.
+- Live smoke test with provided credentials:
+  - Login as `warga38@ktp.iae.id`.
+  - Pay the seeded permit.
+  - Confirm response includes `IAE-LOG-2026-*` receipt.
+  - Confirm `permit.payment.confirmed` appears on `/board`.
+
+## Assumptions
+- Use `TEAM-38` as SOAP `TeamID`.
+- Use Permit Payment as the critical state-changing transaction.
+- Use built-in Node HTTP instead of Express because this environment has bundled Node but no npm/Express.
+- Use the API key only for M2M SOAP and publish calls; use the citizen login token for local user authentication and role mapping.
+- Do not implement TUBES/group requirements such as API Gateway, merged services, Docker group architecture, or group contribution summary.
+```
+
+### Assistant
+
+```text
+Implemented Tugas 3 only.
+
+Built the dependency-free Node service with SSO/JWKS auth, local SQLite role/payment storage, SOAP audit, RabbitMQ publish, and a small dashboard at [http://localhost:3000](http://localhost:3000). The server is currently running in the background on port `3000`.
+
+Key files:
+- [src/server.js](</c/Users/Faris Fadil Arifin/OneDrive/문서/New project/src/server.js>)
+- [src/centralClient.js](</c/Users/Faris Fadil Arifin/OneDrive/문서/New project/src/centralClient.js>)
+- [src/paymentService.js](</c/Users/Faris Fadil Arifin/OneDrive/문서/New project/src/paymentService.js>)
+- [analisis_tugas_3.md](</c/Users/Faris Fadil Arifin/OneDrive/문서/New project/analisis_tugas_3.md>)
+- [prompt_engineering_log.md](</c/Users/Faris Fadil Arifin/OneDrive/문서/New project/prompt_engineering_log.md>)
+- [README.md](</c/Users/Faris Fadil Arifin/OneDrive/문서/New project/README.md>)
+
+Verification done:
+- `node --test`: 11 passing tests.
+- Live smoke script passed with receipt `IAE-LOG-2026-C5F147DD` and `boardMatches: 1`.
+- `/health`, `/api/auth/login`, and `/api/permits` work through the running server.
+- Dashboard opened in the in-app browser, no console errors, desktop/mobile layout checked.
+
+I also created an ignored local `.env` with the provided credentials; `.env.example` is the safe template for the repo.
+```
+
+### User
+
+```text
+my lecturer just give this in the group chat, is this anything do with API?
+```
+
+### Assistant
+
+```text
+Yes, this is related to the API.
+
+That screenshot looks like your lecturer’s monitoring dashboard for the central IAE services:
+
+- `SSO`: how many times that subject/API key/email requested or used SSO/token auth.
+- `SOAP Audit`: how many times it successfully hit the SOAP audit endpoint.
+- `RabbitMQ`: how many times it published messages/events to RabbitMQ.
+
+So it is probably used to check whether each student/team actually called the required APIs.
+
+For your Tugas 3, this is exactly relevant because our implementation does all three:
+
+- Login via SSO
+- Send SOAP audit
+- Publish RabbitMQ event
+
+Your row should be under your API key, `[REDACTED_API_KEY]`, but it is not visible in this cropped part of the screenshot. If your lecturer scrolls/searches that row, it should show activity, especially after the live smoke test we ran successfully.
+```
+
+### User
+
+```text
+so you aleardy access that API? after this the lecturer will give the updated sheets?
+```
+
+### Assistant
+
+```text
+Yes. I already accessed the central APIs using your provided account/API key:
+
+- SSO login: succeeded as `warga38@ktp.iae.id`
+- SOAP Audit: succeeded and returned real receipts, for example `IAE-LOG-2026-C5F147DD`
+- RabbitMQ publish: succeeded with routing key `permit.payment.confirmed`
+- Board search confirmed the message: `boardMatches: 1`
+
+So if your lecturer updates that sheet/dashboard after our test, `[REDACTED_API_KEY]` should show counts for SSO, SOAP Audit, and RabbitMQ.
+
+One small note: I ran the smoke test more than once while verifying, so your counts may be more than `1`. That’s normal and actually proves the API was hit.
+```
+
+### User
+
+```text
+updated the chat docs that record our conversation, exact word and do not aggregated, maybe add some text like tugas 3 to seperate the already chat history in that docs
+```
+

@@ -338,6 +338,19 @@ More details are in [docs/service-requirements.md](docs/service-requirements.md)
 The generic prompt for other teams is in [docs/generic-assignment-prompt.md](docs/generic-assignment-prompt.md).
 The AI chat transcript is in [docs/member-history-ai-chat.md](docs/member-history-ai-chat.md).
 
+## Tugas 3 Individual Integration
+
+The individual Tugas 3 deliverable is kept separate from the Laravel member service in [tugas3/](tugas3/).
+
+Tugas 3 includes:
+
+- SSO JWT login and local `WARGA` role mapping.
+- SOAP audit client for `PermitPaymentConfirmed`.
+- RabbitMQ publish flow with routing key `permit.payment.confirmed`.
+- Analysis document: [analisis_tugas_3.md](analisis_tugas_3.md).
+- Prompt log: [prompt_engineering_log.md](prompt_engineering_log.md).
+- Verbatim chat transcript appended in [docs/member-history-ai-chat.md](docs/member-history-ai-chat.md).
+
 ## Local Non-Docker Setup
 
 Install dependencies:
