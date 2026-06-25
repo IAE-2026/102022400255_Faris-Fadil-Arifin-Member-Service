@@ -1,7 +1,6 @@
 services:
   mysql-member:
     image: mysql:8.4
-    container_name: tubes-iae-mysql-member
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root_password
@@ -25,7 +24,6 @@ services:
   member-service:
     build:
       context: .
-    container_name: tubes-iae-member-service
     restart: unless-stopped
     depends_on:
       mysql-member:
@@ -52,15 +50,12 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - .:/var/www/html
       - member_vendor:/var/www/html/vendor
     networks:
       - iae-network
 
 networks:
-  iae-network:
-    external: true
-    name: tubes-iae-network
+  iae-network: {}
 
 volumes:
   mysql_data:

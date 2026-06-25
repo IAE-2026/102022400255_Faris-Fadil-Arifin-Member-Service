@@ -14,15 +14,27 @@ loan-service repo    -> Peminjaman
 
 Do not put all services into one repository. Services interact through HTTP endpoints.
 
-## Required Docker Network
+## Docker Network
 
-Every teammate must create the same external Docker network:
+For standalone grading or local testing, this repository's default `docker-compose.yml` should run without any manual Docker network setup:
+
+```bash
+docker compose up -d --build
+```
+
+For cross-repository teammate integration, create the same external Docker network once:
 
 ```bash
 docker network create tubes-iae-network
 ```
 
-Every `docker-compose.yml` must join that network:
+Then start this member service with the shared-network override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.shared.yml up -d --build
+```
+
+Other teammate `docker-compose.yml` files can join that network:
 
 ```yaml
 networks:
@@ -283,7 +295,8 @@ Loan service rules:
 A service repo is ready when:
 
 - `docker compose up -d --build` starts without errors.
-- The service joins `tubes-iae-network`.
+- The standalone service starts without a manually-created Docker network.
+- The service can join `tubes-iae-network` when started with `docker-compose.shared.yml`.
 - The service is reachable from host/Postman.
 - The service can reach dependency services by Docker service name.
 - All API endpoints require `X-IAE-KEY` and return the IAE-T2 response envelope.

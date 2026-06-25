@@ -28,7 +28,7 @@ public/storage/
 storage/*.key
 storage/api-docs/
 storage/pail/
-vendor/
+/vendor/
 !public/vendor/
 !public/vendor/graphiql/
 !public/vendor/graphiql/**

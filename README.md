@@ -37,19 +37,15 @@ loan-service
 
 ## Docker Setup
 
-Create the shared external Docker network once on each laptop:
-
-```bash
-docker network create tubes-iae-network
-```
-
 Build and start this service:
 
 ```bash
 docker compose up -d --build
 ```
 
-Run migrations:
+The Docker startup is self-contained for grading: Compose creates the default network automatically, the member service waits for MySQL, and migrations run automatically before Laravel starts.
+
+If you want to rerun migrations manually:
 
 ```bash
 docker compose exec member-service php artisan migrate
@@ -59,6 +55,14 @@ Check the service:
 
 ```bash
 curl http://localhost:8001/
+```
+
+Check the REST API:
+
+```bash
+curl http://localhost:8001/api/v1/members \
+  -H "Accept: application/json" \
+  -H "X-IAE-KEY: 102022400255"
 ```
 
 Open interactive documentation:
@@ -316,7 +320,27 @@ Missing or invalid API keys return HTTP `401`:
 
 ## Teammate Integration
 
-Teammates should not add their services to this repository. Each person should create their own repository and Docker Compose file, then join the same external Docker network:
+Teammates should not add their services to this repository. Each person should create their own repository and Docker Compose file.
+
+For grading or standalone local testing, use the default command:
+
+```bash
+docker compose up -d --build
+```
+
+For cross-repository Docker DNS integration, create the shared network once:
+
+```bash
+docker network create tubes-iae-network
+```
+
+Then start this service with the shared-network override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.shared.yml up -d --build
+```
+
+Other service repositories can join the same external Docker network:
 
 ```yaml
 networks:
